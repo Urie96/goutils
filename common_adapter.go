@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// MapTo can map the structure or slice or map to another different type
 func MapTo(in, out interface{}) interface{} {
 	rType := reflect.TypeOf(in).Elem()
 	switch rType.Kind() {
