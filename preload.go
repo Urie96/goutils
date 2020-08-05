@@ -1,11 +1,9 @@
-package goutils
+package util
 
 import (
 	"fmt"
 	"reflect"
 	"strings"
-
-	"github.com/jinzhu/gorm"
 )
 
 // Preload can load the fields with the preload tag of the in structure,
@@ -15,7 +13,7 @@ import (
 // foreignkey specifies the field to be associated with this structure,
 // and primarykey specifies the field to be associated with the structure pointed to by the field with the preload tag.
 // For example: Asset *Asset `preload:"foreignkey:SerialNumber;primarykey:SerialNumber"`.
-func Preload(db *gorm.DB, in interface{}) {
+func Preload(find func(out interface{}, where ...interface{}), in interface{}) {
 	slice := createAnyTypeSlice(in)
 	if len(slice) < 1 {
 		return
@@ -47,7 +45,7 @@ func Preload(db *gorm.DB, in interface{}) {
 		}
 		fieldToBeAssociation, _ := typ.Field(i).Type.Elem().FieldByName(primarykey)
 		dbres := reflect.New(reflect.SliceOf(typ.Field(i).Type)).Interface()
-		db.Where(getColumnName(&fieldToBeAssociation)+" in (?)", valuesToBeSearch).Find(dbres)
+		find(dbres, getColumnName(&fieldToBeAssociation)+" in (?)", valuesToBeSearch)
 		dbresSlice := createAnyTypeSlice(dbres)
 		for _, item := range dbresSlice {
 			val := reflect.ValueOf(item)
